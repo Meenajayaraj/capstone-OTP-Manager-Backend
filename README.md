@@ -1,0 +1,2 @@
+# OTP-MANAGER
+*** USING MERN STACK ***
