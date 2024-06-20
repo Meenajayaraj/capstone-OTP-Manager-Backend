@@ -4,7 +4,7 @@ const app = express();
 const cors = require("cors");
 require("./db/conn");
 const router = require("./Routes/router");
-const PORT = 4002;
+const PORT = process.env.PORT||4002;
 
 // middleware
 app.use(express.json());
