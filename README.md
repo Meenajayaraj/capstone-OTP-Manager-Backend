@@ -39,5 +39,14 @@
 
 ## Outcome 
 
+### Login Page
+
+![image](https://github.com/Meenajayaraj/capstone-OTP-Manager-Backend/assets/154115927/f795bbe7-d380-46f6-91e5-718cf62ced18)
+
+### sign up page
+
+
+
+
 ![Screenshot 2024-06-20 111211](https://github.com/Meenajayaraj/capstone-OTP-Manager-Backend/assets/154115927/997991e9-4e7f-4b53-a27f-082d6c7b3760)
 
