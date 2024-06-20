@@ -47,9 +47,9 @@
 
 ![Screenshot 2024-06-20 113927](https://github.com/Meenajayaraj/capstone-OTP-Manager-Backend/assets/154115927/8a2d8778-104c-4e9d-a022-684a8cdf5615)
 
-
-
-
+### OTP Verification
 
 ![Screenshot 2024-06-20 111211](https://github.com/Meenajayaraj/capstone-OTP-Manager-Backend/assets/154115927/997991e9-4e7f-4b53-a27f-082d6c7b3760)
+
+
 
