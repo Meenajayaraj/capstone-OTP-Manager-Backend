@@ -45,6 +45,9 @@
 
 ### sign up page
 
+![Screenshot 2024-06-20 113927](https://github.com/Meenajayaraj/capstone-OTP-Manager-Backend/assets/154115927/8a2d8778-104c-4e9d-a022-684a8cdf5615)
+
+
 
 
 
