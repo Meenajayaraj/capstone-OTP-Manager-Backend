@@ -1,8 +1,9 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const SECRECT_KEY = "abcdefghijklmnop";
+const mongoose = require("mongoose");
+const validator = require("validator");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+const keysecret = process.env.SECRET_KEY;
 
 const userSchema = new mongoose.Schema({
   fname: {
@@ -16,11 +17,16 @@ const userSchema = new mongoose.Schema({
     unique: true,
     validate(value) {
       if (!validator.isEmail(value)) {
-        throw new Error("Not Valid Email");
+        throw new Error("not valid email");
       }
     },
   },
   password: {
+    type: String,
+    required: true,
+    minlength: 6,
+  },
+  cpassword: {
     type: String,
     required: true,
     minlength: 6,
@@ -33,33 +39,39 @@ const userSchema = new mongoose.Schema({
       },
     },
   ],
+  verifytoken: {
+    type: String,
+  },
 });
 
 // hash password
+
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     this.password = await bcrypt.hash(this.password, 12);
+    this.cpassword = await bcrypt.hash(this.cpassword, 12);
   }
-
   next();
 });
 
 // token generate
 userSchema.methods.generateAuthtoken = async function () {
   try {
-    let newtoken = jwt.sign({ _id: this._id }, SECRECT_KEY, {
+    let token23 = jwt.sign({ _id: this._id }, keysecret, {
       expiresIn: "1d",
     });
 
-    this.tokens = this.tokens.concat({ token: newtoken });
+    this.tokens = this.tokens.concat({ token: token23 });
     await this.save();
-    return newtoken;
+    return token23;
   } catch (error) {
-    res.status(400).json(error);
+    res.status(422).json(error);
   }
 };
 
 // creating model
-const users = new mongoose.model("users", userSchema);
+const userdb = new mongoose.model("users", userSchema);
 
-module.exports = users;
+module.exports = userdb;
+
+// if (this.isModified("password")) {    }

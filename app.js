@@ -4,10 +4,12 @@ const app = express();
 const cors = require("cors");
 require("./db/conn");
 const router = require("./Routes/router");
+const cookieParser = require("cookie-parser");
 const PORT = process.env.PORT||4002;
 
 // middleware
 app.use(express.json());
+app.use(cookieParser());
 app.use(cors()); 
 app.use(router);
 
