@@ -44,6 +44,8 @@ router.post("/register", async (req, res) => {
         cpassword,
       });
 
+      // here password hasing
+
       const storeData = await finalUser.save();
 
       // console.log(storeData);
@@ -155,8 +157,8 @@ router.post("/sendpasswordlink", async (req, res) => {
       const mailOptions = {
         from: process.env.EMAIL,
         to: email,
-        subject: "Sending Email to Reset password",
-        text: `This Link Valid For 2 MINUTES http://localhost:3000/forgotpassword/${userfind.id}/${setusertoken.verifytoken}`,
+        subject: "Sending Email For password Reset",
+        text: `This Link Valid For 2 MINUTES http://localhost:3001/forgotpassword/${userfind.id}/${setusertoken.verifytoken}`,
       };
 
       transporter.sendMail(mailOptions, (error, info) => {

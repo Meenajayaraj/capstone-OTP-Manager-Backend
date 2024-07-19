@@ -69,7 +69,7 @@ userSchema.methods.generateAuthtoken = async function () {
   }
 };
 
-// creating model
+// createing model
 const userdb = new mongoose.model("users", userSchema);
 
 module.exports = userdb;
