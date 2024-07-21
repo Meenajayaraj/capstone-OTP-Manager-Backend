@@ -1,15 +1,20 @@
-const express = require("express");
-const router = new express.Router();
-const userdb = require("../models/userSchema");
-var bcrypt = require("bcryptjs");
-const authenticate = require("../middleware/authenticate");
-const nodemailer = require("nodemailer");
-const jwt = require("jsonwebtoken");
+// Import required modules
+import express from "express";
+import userdb from "../models/userSchema"; // Adjust the path as per your project structure
+import bcrypt from "bcryptjs";
+import authenticate from "../middleware/authenticate";
+import nodemailer from "nodemailer";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+// Load environment variables from .env file
+dotenv.config();
+
+const router = express.Router();
 
 const keysecret = process.env.SECRET_KEY;
 
-// email config
-
+// Email configuration
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -18,8 +23,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// for user registration
-
+// User registration
 router.post("/register", async (req, res) => {
   const { fname, email, password, cpassword } = req.body;
 
@@ -44,11 +48,12 @@ router.post("/register", async (req, res) => {
         cpassword,
       });
 
-      // here password hasing
+      // Password hashing
+      const salt = await bcrypt.genSalt(12);
+      finalUser.password = await bcrypt.hash(password, salt);
+      finalUser.cpassword = await bcrypt.hash(cpassword, salt);
 
       const storeData = await finalUser.save();
-
-      // console.log(storeData);
       res.status(201).json({ status: 201, storeData });
     }
   } catch (error) {
@@ -57,8 +62,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// user Login
-
+// User login
 router.post("/login", async (req, res) => {
   console.log(req.body);
 
@@ -77,12 +81,14 @@ router.post("/login", async (req, res) => {
       if (!isMatch) {
         res.status(422).json({ error: "invalid details" });
       } else {
-        // token generate
-        const token = await userValid.generateAuthtoken();
+        // Generate token
+        const token = jwt.sign({ _id: userValid._id }, keysecret, {
+          expiresIn: "900s", // Adjust expiration time as needed
+        });
 
-        // cookiegenerate
+        // Set cookie
         res.cookie("usercookie", token, {
-          expires: new Date(Date.now() + 9000000),
+          expires: new Date(Date.now() + 900000), // 15 minutes
           httpOnly: true,
         });
 
@@ -101,7 +107,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// user valid
+// Validate user
 router.get("/validuser", authenticate, async (req, res) => {
   try {
     const ValidUserOne = await userdb.findOne({ _id: req.userId });
@@ -111,8 +117,7 @@ router.get("/validuser", authenticate, async (req, res) => {
   }
 });
 
-// user logout
-
+// User logout
 router.get("/logout", authenticate, async (req, res) => {
   try {
     req.rootUser.tokens = req.rootUser.tokens.filter((curelem) => {
@@ -121,7 +126,7 @@ router.get("/logout", authenticate, async (req, res) => {
 
     res.clearCookie("usercookie", { path: "/" });
 
-    req.rootUser.save();
+    await req.rootUser.save();
 
     res.status(201).json({ status: 201 });
   } catch (error) {
@@ -129,7 +134,7 @@ router.get("/logout", authenticate, async (req, res) => {
   }
 });
 
-// send email Link For reset Password
+// Send email link for password reset
 router.post("/sendpasswordlink", async (req, res) => {
   console.log(req.body);
 
@@ -142,7 +147,7 @@ router.post("/sendpasswordlink", async (req, res) => {
   try {
     const userfind = await userdb.findOne({ email: email });
 
-    // token generate for reset password
+    // Generate token for password reset
     const token = jwt.sign({ _id: userfind._id }, keysecret, {
       expiresIn: "120s",
     });
@@ -157,8 +162,8 @@ router.post("/sendpasswordlink", async (req, res) => {
       const mailOptions = {
         from: process.env.EMAIL,
         to: email,
-        subject: "Sending Email For password Reset",
-        text: `This Link Valid For 2 MINUTES http://localhost:3001/forgotpassword/${userfind.id}/${setusertoken.verifytoken}`,
+        subject: "Sending Email For Password Reset",
+        text: `This Link Valid For 2 MINUTES http://localhost:3001/forgotpassword/${userfind._id}/${setusertoken.verifytoken}`,
       };
 
       transporter.sendMail(mailOptions, (error, info) => {
@@ -169,7 +174,7 @@ router.post("/sendpasswordlink", async (req, res) => {
           console.log("Email sent", info.response);
           res
             .status(201)
-            .json({ status: 201, message: "Email sent Succsfully" });
+            .json({ status: 201, message: "Email sent Successfully" });
         }
       });
     }
@@ -178,7 +183,7 @@ router.post("/sendpasswordlink", async (req, res) => {
   }
 });
 
-// verify user for forgot password time
+// Verify user for forgot password link
 router.get("/forgotpassword/:id/:token", async (req, res) => {
   const { id, token } = req.params;
 
@@ -199,11 +204,9 @@ router.get("/forgotpassword/:id/:token", async (req, res) => {
   }
 });
 
-// change password
-
+// Change password
 router.post("/:id/:token", async (req, res) => {
   const { id, token } = req.params;
-
   const { password } = req.body;
 
   try {
@@ -219,7 +222,7 @@ router.post("/:id/:token", async (req, res) => {
         { password: newpassword }
       );
 
-      setnewuserpass.save();
+      await setnewuserpass.save();
       res.status(201).json({ status: 201, setnewuserpass });
     } else {
       res.status(401).json({ status: 401, message: "user not exist" });
@@ -229,13 +232,4 @@ router.post("/:id/:token", async (req, res) => {
   }
 });
 
-module.exports = router;
-
-// 2 way connection
-// 12345 ---> e#@$hagsjd
-// e#@$hagsjd -->  12345
-
-// hashing compare
-// 1 way connection
-// 1234 ->> e#@$hagsjd
-// 1234->> (e#@$hagsjd,e#@$hagsjd)=> true
+export default router;

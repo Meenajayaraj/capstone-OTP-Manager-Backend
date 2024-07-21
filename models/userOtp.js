@@ -1,7 +1,9 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
+import mongoose from "mongoose";
+import validator from "validator";
 
-const userOtpSchema = new mongoose.Schema({
+const { Schema, model } = mongoose;
+
+const userOtpSchema = new Schema({
   email: {
     type: String,
     required: true,
@@ -19,6 +21,6 @@ const userOtpSchema = new mongoose.Schema({
 });
 
 // user otp model
-const userotp = new mongoose.model("userotps", userOtpSchema);
+const UserOtp = model("userotps", userOtpSchema);
 
-module.exports = userotp;
+export default UserOtp;
